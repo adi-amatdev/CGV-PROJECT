@@ -26,6 +26,13 @@ float animationSpeed = 1.0; // initial animation speed
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 //flag section , contains flags for respective deciding of callbacks
+//integer flags 
+int DISPLAY_CALL_BACK_FLAG =0;
+
+//bool flags
+bool isHoveringOption1 = false;
+bool isHoveringOption2 = false;
+bool isHoveringOption3 = false;
 
 //-----------------------------------------------------------------------------------------------------------------------------------
 // support functions for the program
@@ -99,6 +106,40 @@ void decreaseSpeed()
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 // call back functions
+//this is for intro_page mouse function:
+void onMouseMove(int x, int y)
+{
+    // Update hover status based on mouse position
+    float menuX = (width - 400) / 2.0;
+    float menuY = (height - 200) / 2.0;
+
+    if (x >= menuX && x <= menuX + 400 && y >= menuY + 100 && y <= menuY + 150)
+    {
+        isHoveringOption1 = true;
+    }
+    else
+    {
+        isHoveringOption1 = false;
+    }
+
+    if (x >= menuX && x <= menuX + 400 && y >= menuY && y <= menuY + 50)
+    {
+        isHoveringOption2 = true;
+    }
+    else
+    {
+        isHoveringOption2 = false;
+    }
+
+    if (x >= menuX && x <= menuX + 400 && y >= menuY - 100 && y <= menuY - 50)
+    {
+        isHoveringOption3 = true;
+    }
+    else
+    {
+        isHoveringOption3 = false;
+    }
+}
 
 void reshape(int w, int h)
 {
@@ -136,13 +177,119 @@ void keyboard(unsigned char key, int x, int y)
 }
 //-----------------------------------------------------------------------------------------------------------------------------------
 // display call backs 
+//DISPLAY CALL BACK PAGE1 
+//drawing intro page
+void draw_intro_page()
+{
+    // draw box all around
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(10, 10);
+    glVertex2f(990, 10);
+    glVertex2f(990, 990);
+    glVertex2f(10, 990);
+    glEnd();
 
+    glColor3f(1,0,0);
+    drawText(500-100,700,"CGV PROJECT ");
+    drawText(500-100-10,700-50,"WELCOME PAGE ");
+    drawText(500-100-40,700-100,"PROJECTILE MOTION ");
+
+    float menuX = (width - 400) / 2.0;
+    float menuY = (height - 200) / 2.0;
+
+    if (isHoveringOption2)
+    {
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+    }
+    else
+    {
+        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    }
+    glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
+
+    if (isHoveringOption1)
+    {
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+    }
+    else
+    {
+        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    }
+    glRectf(menuX, menuY + 50, menuX + 400, menuY);
+
+    if (isHoveringOption1)
+    {
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+    }
+    else
+    {
+        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    }
+    glRectf(menuX, menuY - 50, menuX + 400, menuY - 100);
+
+    glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+
+    
+    // Draw menu boxes
+    // glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
+    // glRectf(menuX, menuY + 50, menuX + 400, menuY);
+    // glRectf(menuX, menuY - 50, menuX + 400, menuY - 100);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(menuX, menuY + 150);
+    glVertex2f(menuX + 400, menuY + 150);
+    glVertex2f(menuX + 400, menuY + 100);
+    glVertex2f(menuX, menuY + 100);
+    glEnd();
+
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(menuX, menuY + 50);
+    glVertex2f(menuX + 400, menuY + 50);
+    glVertex2f(menuX + 400, menuY);
+    glVertex2f(menuX, menuY);
+    glEnd();
+
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(menuX, menuY - 50);
+    glVertex2f(menuX + 400, menuY - 50);
+    glVertex2f(menuX + 400, menuY - 100);
+    glVertex2f(menuX, menuY - 100);
+    glEnd();
+
+    glColor3f(1.0, 1.0, 1.0); // Set text color to white
+
+    // Draw menu options
+    float optionX = menuX + 20;
+    float optionY = menuY + 85;
+    drawText(optionX - 120, optionY + 30, "Option 1");
+    drawText(optionX - 120+100+150, optionY + 30, "MENU");
+
+    optionY -= 100;
+    drawText(optionX - 120, optionY + 30, "Option 2");
+    drawText(optionX - 120+100+200-50, optionY + 30, "ABOUT");
+
+    optionY -= 100;
+    drawText(optionX - 120, optionY + 30, "Option 3");
+    drawText(optionX - 120+100+200-40, optionY + 30, "EXIT");
+
+    glutSwapBuffers();
+}
 
 // DISPLAY CALL BACK FOR PAGE 2
 
 // drawing the menu page with projectile options
 void drawMenu()
 {
+    // draw box all around
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(10, 10);
+    glVertex2f(990, 10);
+    glVertex2f(990, 990);
+    glVertex2f(10, 990);
+    glEnd();
+
+    drawWelcomeMessage();
     glColor3f(0.0, 1.5, 0.0); // Set box color to old green
 
     float menuX = (width - 400) / 2.0;
@@ -212,26 +359,17 @@ void arrow_display()
 void display(){
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
-    // draw box all around
-    glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_LINE_LOOP);
-    glVertex2f(10, 10);
-    glVertex2f(990, 10);
-    glVertex2f(990, 990);
-    glVertex2f(10, 990);
-    glEnd();
-
-    drawWelcomeMessage();
+    
 
     // Check the current screen and display accordingly
 
-    switch (3)
+    switch (DISPLAY_CALL_BACK_FLAG)
     {
     case 0: // Display the menu
-        drawMenu();
+        draw_intro_page();
         break;
     case 1: // Display option 1 screen
-        // Code to display option 1 screen
+        drawMenu();
         break;
     case 2: // Display option 2 screen
         // Code to display option 2 screen
@@ -264,6 +402,7 @@ int main(int argc , char *argv[]){
     glutReshapeFunc(reshape);
     glutTimerFunc(0, timer, 0);
     glutKeyboardFunc(keyboard); // Register keyboard callback function
+    glutPassiveMotionFunc(onMouseMove);
 
     glutMainLoop();
     return 0;
