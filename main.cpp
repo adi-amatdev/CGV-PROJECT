@@ -112,8 +112,9 @@ void onMouseMove(int x, int y)
     // Update hover status based on mouse position
     float menuX = (width - 400) / 2.0;
     float menuY = (height - 200) / 2.0;
+    // glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
 
-    if (x >= menuX && x <= menuX + 400 && y >= menuY + 100 && y <= menuY + 150)
+    if (x >= menuX && x <= menuX + 400 && y >= menuY + 150 && y <= menuY + 150)
     {
         isHoveringOption1 = true;
     }
@@ -198,35 +199,35 @@ void draw_intro_page()
     float menuX = (width - 400) / 2.0;
     float menuY = (height - 200) / 2.0;
 
+    if (isHoveringOption1)
+    {
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+        glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
+    }
+    else
+    {
+        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    }
+
     if (isHoveringOption2)
     {
         glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+        glRectf(menuX, menuY - 50, menuX + 400, menuY - 100);
     }
     else
     {
         glColor3f(0.0, 1.5, 0.0); // Set box color to old green
     }
-    glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
 
-    if (isHoveringOption1)
+    if (isHoveringOption3)
     {
         glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+        glRectf(menuX, menuY + 50, menuX + 400, menuY);
     }
     else
     {
         glColor3f(0.0, 1.5, 0.0); // Set box color to old green
     }
-    glRectf(menuX, menuY + 50, menuX + 400, menuY);
-
-    if (isHoveringOption1)
-    {
-        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
-    }
-    else
-    {
-        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
-    }
-    glRectf(menuX, menuY - 50, menuX + 400, menuY - 100);
 
     glColor3f(0.0, 1.5, 0.0); // Set box color to old green
 
