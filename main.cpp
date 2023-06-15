@@ -165,6 +165,8 @@ void drawMenu()
     optionY -= 100;
     drawText(optionX - 120, optionY + 30, "Option 3");
 
+    glutSwapBuffers();
+
 }
 
 // CALL BACK FUNCTION FOR ARROW 
@@ -223,7 +225,7 @@ void display(){
 
     // Check the current screen and display accordingly
 
-    switch (0)
+    switch (3)
     {
     case 0: // Display the menu
         drawMenu();
@@ -252,7 +254,7 @@ int main(int argc , char *argv[]){
     //we write call backs in main , display method with switch cases and remove resize func button for our window
 
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE| GLUT_DOUBLE| GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE| GLUT_RGB);
     glutInitWindowSize(1000, 1000);
     glutCreateWindow("Projectile Motion");
 
