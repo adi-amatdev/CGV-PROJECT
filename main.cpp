@@ -125,7 +125,7 @@ void onMouseMove(int x, int y)
 
     if (x >= menuX && x <= menuX + 400 && y >= menuY && y <= menuY + 50)
     {
-        isHoveringOption2 = true;
+        isHoveringOption2= true;
     }
     else
     {
