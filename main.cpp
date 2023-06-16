@@ -27,7 +27,7 @@ float animationSpeed = 1.0; // initial animation speed
 
 //flag section , contains flags for respective deciding of callbacks
 //integer flags 
-int DISPLAY_CALL_BACK_FLAG =0;
+int DISPLAY_CALL_BACK_FLAG =1;
 
 //bool flags
 bool isHoveringOption1 = false;
@@ -112,9 +112,8 @@ void onMouseMove(int x, int y)
     // Update hover status based on mouse position
     float menuX = (width - 400) / 2.0;
     float menuY = (height - 200) / 2.0;
-    // glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
 
-    if (x >= menuX && x <= menuX + 400 && y >= menuY + 150 && y <= menuY + 150)
+    if (x >= menuX && x <= (menuX + 400) && y >= (menuY + 100) && y <=( menuY + 150))
     {
         isHoveringOption1 = true;
     }
@@ -123,9 +122,9 @@ void onMouseMove(int x, int y)
         isHoveringOption1 = false;
     }
 
-    if (x >= menuX && x <= menuX + 400 && y >= menuY && y <= menuY + 50)
+    if (x >= menuX && x <= (menuX + 400) && y >= menuY && y <= menuY + 50)
     {
-        isHoveringOption2= true;
+        isHoveringOption2 = true;
     }
     else
     {
@@ -140,6 +139,7 @@ void onMouseMove(int x, int y)
     {
         isHoveringOption3 = false;
     }
+    
 }
 
 void reshape(int w, int h)
@@ -199,10 +199,12 @@ void draw_intro_page()
     float menuX = (width - 400) / 2.0;
     float menuY = (height - 200) / 2.0;
 
-    if (isHoveringOption1)
+    if (isHoveringOption3)
     {
         glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
-        glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
+        glRectf(menuX, menuY + 50, menuX + 400, menuY);
+
+        // glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
     }
     else
     {
@@ -219,10 +221,9 @@ void draw_intro_page()
         glColor3f(0.0, 1.5, 0.0); // Set box color to old green
     }
 
-    if (isHoveringOption3)
+    if (isHoveringOption1)
     {
         glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
-        glRectf(menuX, menuY + 50, menuX + 400, menuY);
     }
     else
     {
@@ -290,15 +291,70 @@ void drawMenu()
     glVertex2f(10, 990);
     glEnd();
 
-    drawWelcomeMessage();
-    glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    glColor3f(1, 0, 0);
+    drawText(500 -100, 700 - 100, "MENU");
 
     float menuX = (width - 400) / 2.0;
     float menuY = (height - 200) / 2.0;
+    //third box
+    if (isHoveringOption3)
+    {
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+        glRectf(menuX, menuY + 50, menuX + 455, menuY);
+
+        // 
+    }
+    else
+    {
+        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    }
+    //second box
+    if (isHoveringOption2)
+    {
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+        glRectf(menuX, menuY - 50, menuX + 400, menuY - 100);
+    }
+    else
+    {
+        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    }
+
+    if (isHoveringOption1)
+    {
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+        glRectf(menuX, menuY + 100, menuX + 400, menuY + 150);
+    }
+    else
+    {
+        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    }
+
+    glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+
     // Draw menu boxes
-    glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
-    glRectf(menuX, menuY + 50, menuX + 400, menuY);
-    glRectf(menuX, menuY - 50, menuX + 400, menuY - 100);
+    // glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
+    // glRectf(menuX, menuY + 50, menuX + 400, menuY);
+    // glRectf(menuX, menuY - 50, menuX + 400, menuY - 100);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(menuX, menuY + 150);
+    glVertex2f(menuX + 400+80, menuY + 150);
+    glVertex2f(menuX + 400+80, menuY + 100);
+    glVertex2f(menuX, menuY + 100);
+    glEnd();
+
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(menuX, menuY + 50);
+    glVertex2f(menuX + 455, menuY + 50);
+    glVertex2f(menuX + 455, menuY);
+    glVertex2f(menuX, menuY);
+    glEnd();
+
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(menuX, menuY - 50);
+    glVertex2f(menuX + 400, menuY - 50);
+    glVertex2f(menuX + 400, menuY - 100);
+    glVertex2f(menuX, menuY - 100);
+    glEnd();
 
     glColor3f(1.0, 1.0, 1.0); // Set text color to white
 
@@ -306,15 +362,17 @@ void drawMenu()
     float optionX = menuX + 20;
     float optionY = menuY + 85;
     drawText(optionX - 120, optionY + 30, "Option 1");
+    drawText(optionX - 15, optionY + 30, "Input distance , obtain optimal angle , trajectory");
 
     optionY -= 100;
     drawText(optionX - 120, optionY + 30, "Option 2");
+    drawText(optionX -10, optionY + 30, "input time and obtain velocity and other info");
 
     optionY -= 100;
     drawText(optionX - 120, optionY + 30, "Option 3");
+    drawText(optionX +70, optionY + 30, "max height to be thrown ");
 
     glutSwapBuffers();
-
 }
 
 // CALL BACK FUNCTION FOR ARROW 
