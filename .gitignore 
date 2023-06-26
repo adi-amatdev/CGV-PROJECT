@@ -36,3 +36,4 @@ build/
 # Other generated or user-specific files
 config.ini
 
+a.out
