@@ -1,37 +1,76 @@
 #define GL_SILENCE_DEPRECATION
 
-#include "myHeader.h"
 #include<iostream>
 using namespace std;
 #include <GL/glut.h>
 #include <stdlib.h>
-#include <cmath>
 #include <stdio.h>
 #include <fstream>
 #include <string>
+#include <chrono>
+#include <thread>
+#include <GL/freeglut.h>
+#include <cmath>
+#include <vector>
+#include <iostream>
+#include <GL/freeglut.h>
+
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 // Global variable pool... must be accessible to all functions
+
+bool animationRunning = true;
 
 // Window size
 int width = 1000;
 int height = 1000;
 
+// Window dimensions
+const int WINDOW_WIDTH = 3000;
+const int WINDOW_HEIGHT = 3000;
 
-// arrow global variables
-const float g = 9.8;    // acceleration due to gravity
-float u = 100.0;        // initial velocity
-float theta = 60.0;     // launch angle in degrees (angle of projection)
-float t = 0.0;          // time
-float x = 0.0, y = 0.0; // position of the projectile
-float vx, vy, vz;       // velocity of the projectile along horizontal and vertical.
-float dt = 0.01;        // time step the intervals we are calculating the position of the projectile.
-float at = 0.09;
-float archerHeight = 1.5;   // height of the archer (starting position we haven't drawn the archer actually.)
-float animationSpeed = 1.0; // initial animation speed
+// Cannon attributes
+const float CANNON_BASE_RADIUS = 30.0f;
+const float CANNON_BARREL_LENGTH = 100.0f;
+const float CANNON_BARREL_WIDTH = 20.0f;
+
+// Projectile attributes
+const float PROJECTILE_RADIUS = 10.0f;
+const float GRAVITY = 9.8f;
+
+// Cannon position and rotation
+float cannonX = CANNON_BASE_RADIUS;
+float cannonY = CANNON_BASE_RADIUS;
+float cannonAngle = 45.0f;
+
+// Projectile position and velocity
+float projectileX = 0.0f;
+float projectileY = 0.0f;
+float projectileVx = 0.0f;
+float projectileVy = 0.0f;
+float projectileSpeed = 5.0f; // Speed of the projectile
+bool isProjectileLaunched = false;
+bool isTrajectoryComplete = true;
+
+// Mouse state
+bool isLeftMouseButtonPressed = false;
+int previousMouseX = 0;
+int previousMouseY = 0;
+
+// Rotation limits
+const float MIN_ANGLE = 0.0f;
+const float MAX_ANGLE = 90.0f;
+
+// Trail history
+std::vector<std::pair<float, float> > trailPoints;
+
+// Time of flight and velocity variables
+float timeOfFlight = 0.0f;
+float velocity = 0.0f;
 
 float menuX = (width - 400) / 2.0;
 float menuY = (height - 200) / 2.0;
+int id;
 
 //-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,33 +88,7 @@ bool aboutpageisHovering2 = false;
 //-----------------------------------------------------------------------------------------------------------------------------------
 // support functions for the program
 
-// called by call back function arrow_display()
-void drawArrow(float x, float y, float angle)
-{
-    glPushMatrix();
-    glTranslatef(x, y, 0.0);
-    glRotatef(angle, 0.0, 0.0, 1.0);
-    glColor3f(1.0, 1.0, 1.0);
-    glScalef(30.0, 20.0, 20.0);
 
-    glBegin(GL_LINES);
-    glVertex2f(0.0, 0.0);
-    glVertex2f(2.0, 0.0);
-    glVertex2f(2.0, 0.0);
-    glVertex2f(1.5, 0.5);
-    glVertex2f(2.0, 0.0);
-    glVertex2f(1.5, -0.5);
-    glEnd();
-
-    // Draw the solid triangle head
-    glBegin(GL_TRIANGLES);
-    glVertex2f(2.0, 0.0);
-    glVertex2f(1.5, 0.5);
-    glVertex2f(1.5, -0.5);
-    glEnd();
-
-    glPopMatrix();
-}
 // called in drawMenu() and can be used anywhere to draw text
 void drawText(float x, float y, const char *text)
 {
@@ -95,21 +108,116 @@ void drawWelcomeMessage()
     drawText(welcomeX - 50, welcomeY - 300, "Welcome to Projectile Motion");
 }
 
-
-//invoked in keyboard func call back
-void increaseSpeed()
+// Function to draw the cannon
+void drawCannon()
 {
-    animationSpeed += 0.1;
+    glColor3f(0.0f, 0.0f, 0.0f);
+
+    glPushMatrix();
+    glTranslatef(cannonX, cannonY, 0.0f);
+
+    // Draw cannon base (a circle)
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(0.0f, 0.0f);
+    for (int i = 0; i <= 360; i += 10)
+    {
+        float angleRad = i * M_PI / 180.0f;
+        float x = CANNON_BASE_RADIUS * cos(angleRad);
+        float y = CANNON_BASE_RADIUS * sin(angleRad);
+        glVertex2f(x, y);
+    }
+    glEnd();
+
+    // Draw cannon barrel (a rectangle)
+    glPushMatrix();
+    glTranslatef(CANNON_BASE_RADIUS, 0.0f, 0.0f);
+    glRotatef(cannonAngle, 0.0f, 0.0f, 1.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(0.0f, -CANNON_BARREL_WIDTH / 2.0f);
+    glVertex2f(CANNON_BARREL_LENGTH, -CANNON_BARREL_WIDTH / 2.0f);
+    glVertex2f(CANNON_BARREL_LENGTH, CANNON_BARREL_WIDTH / 2.0f);
+    glVertex2f(0.0f, CANNON_BARREL_WIDTH / 2.0f);
+    glEnd();
+    glPopMatrix();
+
+    glPopMatrix();
 }
 
-void decreaseSpeed()
+// Function to draw the projectile
+void drawProjectile()
 {
-    if (animationSpeed > 0.1)
+    if (isProjectileLaunched)
     {
-        animationSpeed -= 0.1;
+        glColor3f(1.0f, 0.0f, 0.0f);
+
+        glPushMatrix();
+        glTranslatef(projectileX, projectileY, 0.0f);
+        glBegin(GL_TRIANGLE_FAN);
+        for (int i = 0; i <= 360; i += 10)
+        {
+            float angleRad = i * M_PI / 180.0f;
+            float x = PROJECTILE_RADIUS * cos(angleRad);
+            float y = PROJECTILE_RADIUS * sin(angleRad);
+            glVertex2f(x, y);
+        }
+        glEnd();
+        glPopMatrix();
     }
 }
 
+// Function to draw the trail
+void drawTrail()
+{
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glEnable(GL_LINE_STIPPLE);
+    glLineStipple(1, 0xAAAA);
+    glLineWidth(2.0f);
+
+    glBegin(GL_LINE_STRIP);
+    for (const auto &point : trailPoints)
+    {
+        glVertex2f(point.first, point.second);
+    }
+    glEnd();
+
+    glDisable(GL_LINE_STIPPLE);
+}
+// Function to update the projectile position
+void updateProjectile()
+{
+    if (isProjectileLaunched)
+    {
+        projectileX += projectileVx;
+        projectileY += projectileVy;
+
+        projectileVy -= GRAVITY * 0.01f; // Adjust the time step as needed
+
+        // Store the current position in the trail
+        trailPoints.emplace_back(projectileX, projectileY);
+
+        // Check if the projectile is out of bounds or hits the ground
+        if (projectileX > WINDOW_WIDTH || projectileY < 0.0f)
+        {
+            isProjectileLaunched = false;
+            trailPoints.clear();
+            std::cout<<"PROJECTILE LAUNCHED:"<<std::endl<<std::endl;
+            // Calculate and print the projectile information
+            float angleOfProjection = cannonAngle;
+            float horizontalDistance = projectileX - cannonX;
+            float maxHeight = projectileY - cannonY;
+            timeOfFlight = (2.0f * projectileVy) / GRAVITY;
+            velocity = sqrt(pow(projectileVx, 2) + pow(projectileVy, 2));
+
+            std::cout << "Angle of Projection: " << angleOfProjection << " degrees" << std::endl;
+            std::cout << "Horizontal Distance Traveled: " << horizontalDistance << " units" << std::endl;
+            std::cout << "Maximum Height Reached: " << -maxHeight << " units" << std::endl;
+            std::cout << "Time of Flight: " << -timeOfFlight << " seconds" << std::endl;
+            std::cout << "Velocity: " << velocity << " units/s" << std::endl;
+
+            isTrajectoryComplete = true;
+        }
+    }
+}
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 // this space contains display pages of the five pages required for the project, their only purpose
@@ -121,6 +229,22 @@ void decreaseSpeed()
 //this is for intro_page mouse function:
 
 void mousefunc(int button, int state, int x, int y){
+    if(DISPLAY_CALL_BACK_FLAG == 3){
+            if (button == GLUT_LEFT_BUTTON)
+            {
+                if (state == GLUT_DOWN)
+                {
+                    isLeftMouseButtonPressed = true;
+                    previousMouseX = x;
+                    previousMouseY = y;
+                }
+                else if (state == GLUT_UP)
+                {
+                    isLeftMouseButtonPressed = false;
+                }
+            }
+        
+    }
     if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
         switch (DISPLAY_CALL_BACK_FLAG){
             case 0:
@@ -142,8 +266,35 @@ void mousefunc(int button, int state, int x, int y){
             }
             break;
             case 2:
-
+            if (x >= menuX && x <= menuX + 400 && y >= menuY + 120 + 200 && y <= menuY + 170 + 200)
+            {
+                exit(0);
+            }
+            if (x >= menuX && x <= menuX + 400 && y >= menuY + 50 + 200 && y <= menuY + 100 + 200)
+            {
+                DISPLAY_CALL_BACK_FLAG = 0;
+            }
             break;
+            case 1:
+            if (x >= 300 && x <= 700 && y >= 225 && y <= 275)
+            {
+                DISPLAY_CALL_BACK_FLAG = 3;
+                glutPostRedisplay();
+            }
+
+            if (x >= menuX && x <= (menuX + 400) && y >= menuY && y <= menuY + 50)
+            {
+                DISPLAY_CALL_BACK_FLAG = 0;
+                glutPostRedisplay();
+            }
+
+            if (x >= menuX && x <= menuX + 400 && y >= menuY - 100 && y <= menuY - 50)
+            {
+                DISPLAY_CALL_BACK_FLAG = 4;
+                glutPostRedisplay();
+            }
+            break;
+
         }
     }
 }
@@ -200,13 +351,37 @@ void onMouseMove(int x, int y)
     
     
 }
-
-void reshape(int w, int h)
+void motion(int x, int y)
 {
-    glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+    if (isLeftMouseButtonPressed)
+    {
+        int deltaX = x - previousMouseX;
+        int deltaY = y - previousMouseY;
+        cannonAngle += deltaX * 0.5f; // Adjust the rotation speed as needed
+
+        // Limit the cannon rotation within the specified range
+        if (cannonAngle < MIN_ANGLE)
+        {
+            cannonAngle = MIN_ANGLE;
+        }
+        else if (cannonAngle > MAX_ANGLE)
+        {
+            cannonAngle = MAX_ANGLE;
+        }
+
+        previousMouseX = x;
+        previousMouseY = y;
+
+        glutPostRedisplay();
+    }
+}
+void reshape(int width, int height)
+{
+    glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0, w, 0, h);
+    gluOrtho2D(0, width, 0, height);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 void myInit()
@@ -216,27 +391,137 @@ void myInit()
     gluOrtho2D(0, 1000, 0, 1000);
     glMatrixMode(GL_MODELVIEW);
 }
-void timer(int value)
+
+// change this
+
+// Function to update the scene
+void update(int value)
 {
-    t += dt * animationSpeed; // Multiply time step by animation speed
+    if (animationRunning)
+    {
+        // Your animation   update code here
+        glutPostRedisplay();
+        glutTimerFunc(16, update, 0);
+        updateProjectile();
+    }
+    
     glutPostRedisplay();
-    glutTimerFunc(16, timer, 0);
+    glutTimerFunc(16, update, 0);
 }
 
+// Function to handle keyboard events
 void keyboard(unsigned char key, int x, int y)
 {
-    switch (key)
+    if (key == ' ')
     {
-    case '+':
-        increaseSpeed();
-        break;
-    case '-':
-        decreaseSpeed();
-        break;
+        if (!isProjectileLaunched && isTrajectoryComplete)
+        {
+            float angleRad = cannonAngle * M_PI / 180.0f;
+            projectileX = cannonX + (CANNON_BARREL_LENGTH * cos(angleRad));
+            projectileY = cannonY + (CANNON_BARREL_LENGTH * sin(angleRad));
+            projectileVx = projectileSpeed * cos(angleRad);
+            projectileVy = projectileSpeed * sin(angleRad);
+            isProjectileLaunched = true;
+            isTrajectoryComplete = false;
+        }
+    }
+    if(DISPLAY_CALL_BACK_FLAG == 3){
+        if(key == 's'){
+            DISPLAY_CALL_BACK_FLAG = 6;
+            glutPostRedisplay();
+        }
+    }
+    if(DISPLAY_CALL_BACK_FLAG == 6){
+        if(key =='m'){
+            DISPLAY_CALL_BACK_FLAG = 0;
+            glutPostRedisplay();
+        }
+        if(key == 'e') exit(0);
+        if (key == 'p' || key == 'P')
+        {
+            animationRunning = !animationRunning; // Toggle animation flag
+        }
+    }
+}
+void specialKeyboard(int key, int x, int y)
+{
+    if (!isProjectileLaunched)
+    {
+        switch (key)
+        {
+        case GLUT_KEY_UP: // Increase speed on Up arrow key
+            if (projectileSpeed < 14.0f)
+                projectileSpeed += 1.0f;
+            break;
+        case GLUT_KEY_DOWN: // Decrease speed on Down arrow key
+            if (projectileSpeed > 0.0f)
+            {
+                projectileSpeed -= 1.0f;
+            }
+            break;
+        default:
+            break;
+        }
+
+        float angleRad = cannonAngle * M_PI / 180.0f;
+        projectileVx = projectileSpeed * cos(angleRad);
+        projectileVy = projectileSpeed * sin(angleRad);
     }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------
-// display call backs 
+// display call backs
+// simluation canon ball
+// Function to display the scene
+void subwindowDisplay()
+{
+    
+       drawText(300,700, "use mouse to aim cannon by dragging");
+       drawText(300, 650, "up and down arrow to increase power of projectile and vice versa");
+       drawText(300, 600, "press space bar to launch");
+       drawText(300,550, "use mouse to aim cannon by dragging");
+       drawText(300, 500, "press 'p' to pause, 'p' to continue again");
+       drawText(300, 450, "press 'm' to return to main menu");
+       drawText(300, 400, "press 'e' to exit");
+       glColor3f(1,0,0);
+       drawText(300, 350, "press 's' key to start simulation now");
+           glutSwapBuffers();
+}
+
+void simulation_display()
+{
+    
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glTranslatef(0.0f, 0.0f, 0.0f); // Set the origin to the bottom left of the window
+
+    drawCannon();
+    drawProjectile();
+    drawTrail();
+
+    glutSwapBuffers();
+}
+
+// under construction page
+void under_construct_display()
+{
+
+    // Display "Under Construction" message
+    glColor3f(1.0f, 1.0f, 1.0f); // Set color to white
+    glRasterPos2f(width / 2 - 80, height / 2);
+    const char *message = "Under Construction";
+    for (int i = 0; message[i] != '\0'; i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, message[i]);
+    }
+
+    
+    glutSwapBuffers(); // Swap the front and back buffers to display the rendered scene
+}
+
 //DISPLAY CALL BACK PAGE1 
 //drawing intro page
 void draw_intro_page()
@@ -407,15 +692,15 @@ void drawMenu()
     float optionX = menuX + 20;
     float optionY = menuY + 85;
     drawText(optionX - 120, optionY + 30, "Option 1");
-    drawText(optionX - 15, optionY + 30, "Input distance , obtain optimal angle , trajectory");
+    drawText(optionX - 15+100+50, optionY + 30, "Simulate canon ");
 
     optionY -= 100;
     drawText(optionX - 120, optionY + 30, "Option 2");
-    drawText(optionX -10, optionY + 30, "input time and obtain velocity and other info");
+    drawText(optionX -10+100+10, optionY + 30, "other functionalities");
 
     optionY -= 100;
     drawText(optionX - 120, optionY + 30, "Option 3");
-    drawText(optionX +70, optionY + 30, "max height to be thrown ");
+    drawText(optionX +70+20, optionY + 30, "back to main menu ");
 
     glutSwapBuffers();
 }
@@ -518,43 +803,7 @@ void draw_about_page()
 }
 
 // CALL BACK FUNCTION FOR ARROW 
-void arrow_display()
-{
-    glClear(GL_COLOR_BUFFER_BIT);
 
-    // Calculate angle of velocity vector
-    float velocityAngle = atan2(vy, vx) * 180.0 / M_PI;
-    drawArrow(x, y, velocityAngle);
-
-    // Draw the trajectory points
-    glColor3f(1.0, 1.0, 1.0); // Set color for trajectory points
-    glPointSize(2.0);         // Set point size for trajectory points
-    glBegin(GL_POINTS);
-    for (float i = 0.0; i <= t; i += at)
-    {
-        float xPos = u * cos(theta * M_PI / 180.0) * i;
-        float yPos = archerHeight + u * sin(theta * M_PI / 180.0) * i - 0.5 * g * i * i;
-        glVertex2f(xPos, yPos);
-    }
-    glEnd();
-
-    // Update the position and velocity of the projectile
-    x = u * cos(theta * M_PI / 180.0) * t;
-    y = archerHeight + u * sin(theta * M_PI / 180.0) * t - 0.5 * g * t * t;
-    vx = u * cos(theta * M_PI / 180.0);
-    vy = u * sin(theta * M_PI / 180.0) - g * t;
-    vz = 0.0;
-
-    // Check if the projectile has hit the ground
-    if (y < archerHeight)
-    {
-        t = 0.0;
-        x = 0.0;
-        y = archerHeight;
-    }
-
-    glutSwapBuffers();
-}
 //-----------------------------------------------------------------------------------------------------------------------------------
 //MASTER DISPLAY FUNC : REGISTERED CALL BACK
 void display(){
@@ -575,8 +824,18 @@ void display(){
     case 2: // Display option 2 screen
         draw_about_page();
         break;
-    case 3: // Display option 3 screen
-        arrow_display();
+    case 3:
+    subwindowDisplay();
+    break;
+    case 6: // Display option screen
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        simulation_display();
+        break;
+    case 4:
+        under_construct_display();
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        DISPLAY_CALL_BACK_FLAG = 1;
+        glutPostRedisplay();
         break;
     default:
         break;
@@ -596,16 +855,16 @@ int main(int argc , char *argv[]){
     glutInitDisplayMode(GLUT_DOUBLE| GLUT_RGB);
     glutInitWindowSize(1000, 1000);
     glutCreateWindow("Projectile Motion");
-
     myInit();
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-    glutTimerFunc(0, timer, 0);
     glutKeyboardFunc(keyboard); // Register keyboard callback function
+    glutSpecialFunc(specialKeyboard);
     glutMouseFunc(mousefunc);
     glutPassiveMotionFunc(onMouseMove);
-
+    glutMotionFunc(motion);
+    glutTimerFunc(0, update, 0);
     glutMainLoop();
     return 0;
 }
