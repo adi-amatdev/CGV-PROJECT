@@ -2,4 +2,5 @@
 #include <stdlib.h>
 #include <cmath>
 #include <stdio.h>
-//global variable pool
+#include <fstream>
+#include <string>

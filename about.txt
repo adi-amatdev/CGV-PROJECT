@@ -1,0 +1,24 @@
+Project: Projectile Motion Simulation
+
+Description:
+The "Projectile Motion Simulation" project aims to provide a visual
+representation of projectile motion. It demonstrates the basic formulas, 
+theories, and ideas behind displaying a cannonball in motion. With this 
+simulation, users can interactively adjust the cannon's angle using the 
+mouse and increase or decrease the power using arrow keys. The cannonball 
+is launched by pressing the space bar. The simulation also traces the path 
+of the projectile.
+
+Authors:
+- Udupi Aaditya Acharya (USN: 1RN20CS169)
+- Vikas Srinivasa (USN: 1RN20CS178)
+
+This project was developed as part of our college coursework and serves as a practical
+implementation of the concepts learned in physics and computer graphics. It provides 
+an engaging way to understand the principles of projectile motion.
+
+We hope you find this simulation informative and enjoyable!
+
+For any inquiries or feedback, please contact us at:
+- Udupi Aaditya Acharya: uaa.acharya@gmail.com
+- Vikas Srinivasa: vikas@example.com

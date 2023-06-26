@@ -1,5 +1,6 @@
-#include "myHeader.h"
 #define GL_SILENCE_DEPRECATION
+
+#include "myHeader.h"
 #include<iostream>
 using namespace std;
 //-----------------------------------------------------------------------------------------------------------------------------------
@@ -30,13 +31,15 @@ float menuY = (height - 200) / 2.0;
 
 //flag section , contains flags for respective deciding of callbacks
 //integer flags 
-int DISPLAY_CALL_BACK_FLAG =0;
+int DISPLAY_CALL_BACK_FLAG =2;
 
 //bool flags
 bool isHoveringOption1 = false;
 bool isHoveringOption2 = false;
 bool isHoveringOption3 = false;
 
+bool aboutpageisHovering1 = false;
+bool aboutpageisHovering2 = false;
 //-----------------------------------------------------------------------------------------------------------------------------------
 // support functions for the program
 
@@ -114,34 +117,52 @@ void onMouseMove(int x, int y)
 {
     // Update hover status based on mouse position
     
-   
-    if (x >= 300 && x <= 700 && y >= 225 && y <=275)
-    {
-        isHoveringOption1 = true;
-        
+   if(DISPLAY_CALL_BACK_FLAG ==1 || DISPLAY_CALL_BACK_FLAG ==0){
+        if (x >= 300 && x <= 700 && y >= 225 && y <=275)
+        {
+            isHoveringOption1 = true;
+            
+        }
+        else
+        {
+            isHoveringOption1 = false;
+        }
+        //box3
+        if (x >= menuX && x <= (menuX + 400) && y >= menuY && y <= menuY + 50)
+        {
+            isHoveringOption2 = true;
+        }
+        else
+        {
+            isHoveringOption2 = false;
+        }
+        //box2
+        if (x >= menuX && x <= menuX + 400 && y >= menuY - 100 && y <= menuY - 50)
+        {
+            isHoveringOption3 = true;
+        }
+        else
+        {
+            isHoveringOption3 = false;
+        }
     }
-    else
-    {
-        isHoveringOption1 = false;
+    if(DISPLAY_CALL_BACK_FLAG ==2){
+        if(x >= menuX && x<= menuX+400 && y>= menuY+120+200 && y<= menuY+170+200){
+            aboutpageisHovering1 = true;
+        }
+        else {
+            aboutpageisHovering1 = false;
+        }
+        if (x >= menuX && x <= menuX + 400 && y>=menuY+50+200 &&y<= menuY+100+200){
+            aboutpageisHovering2 = true ;
+        }
+        else {
+            aboutpageisHovering2 = false;
+        }
     }
-    //box3
-    if (x >= menuX && x <= (menuX + 400) && y >= menuY && y <= menuY + 50)
-    {
-        isHoveringOption2 = true;
-    }
-    else
-    {
-        isHoveringOption2 = false;
-    }
-    //box2
-    if (x >= menuX && x <= menuX + 400 && y >= menuY - 100 && y <= menuY - 50)
-    {
-        isHoveringOption3 = true;
-    }
-    else
-    {
-        isHoveringOption3 = false;
-    }
+
+
+    
     
 }
 
@@ -204,7 +225,7 @@ void draw_intro_page()
 
     if (isHoveringOption3)
     {
-        glColor3f(0.0, 1.0, 0.0); // Set box color to red when hovering
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
         glRectf(menuX, menuY + 50, menuX + 400, menuY);
 
         // 
@@ -217,7 +238,7 @@ void draw_intro_page()
     else if (isHoveringOption1)
     {
         glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
-        glRectf(menuX+100, menuY + 100, menuX + 600, menuY + 150);
+        glRectf(menuX, menuY + 100, menuX + 400, menuY + 150);
     }
     else
     {
@@ -286,7 +307,7 @@ void drawMenu()
     glEnd();
 
     glColor3f(1, 0, 0);
-    drawText(500 -100, 700 - 100, "MENU");
+    drawText(500 , 700 - 100, "MENU");
 
     float menuX = (width - 400) / 2.0;
     float menuY = (height - 200) / 2.0;
@@ -364,6 +385,103 @@ void drawMenu()
     glutSwapBuffers();
 }
 
+//display CALLBACK FOR PAGE 3 : ABOUT
+
+void draw_about_page()
+{
+    // draw box all around
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(10, 10);
+    glVertex2f(990, 10);
+    glVertex2f(990, 990);
+    glVertex2f(10, 990);
+    glEnd();
+
+    glColor3f(1, 0, 0);
+    drawText(500-50, 800 - 100, "ABOUT");
+    // displaying info about project 
+    { int x=300,y=650;
+    std::ifstream aboutFile("about.txt");
+    if (aboutFile.is_open())
+    {
+        std::string line;
+        while (std::getline(aboutFile, line))
+        {
+            // Display each line of about info
+            glRasterPos2i(x, y);
+            for (char c : line)
+            {
+                glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, c);
+            }
+            y -= 20; // Move to the next line
+        }
+        aboutFile.close();
+    }
+    }
+
+    float menuX = (width - 400) / 2.0;
+    float menuY = (height - 200) / 2.0;
+    // third box
+    if (aboutpageisHovering1)
+    {
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+        glRectf(menuX, menuY -170-200, menuX + 400, menuY-120-200);
+    }
+    else
+    {
+        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    }
+    // second box
+    if (aboutpageisHovering2)
+    {
+        glColor3f(1.0, 0.0, 0.0); // Set box color to red when hovering
+        glRectf(menuX, menuY - 50-200, menuX + 400, menuY - 100-200);
+    }
+    else
+    {
+        glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+    }
+
+
+    glColor3f(0.0, 1.5, 0.0); // Set box color to old green
+
+    // Draw menu boxes
+    // glRectf(menuX, menuY + 150, menuX + 400, menuY + 100);
+    // glRectf(menuX, menuY + 50, menuX + 400, menuY);
+    // glRectf(menuX, menuY - 50, menuX + 400, menuY - 100);
+   {
+    menuY = 200;
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(menuX, menuY-170);
+    glVertex2f(menuX + 400, menuY - 170);
+    glVertex2f(menuX + 400, menuY-120);
+    glVertex2f(menuX, menuY-120);
+    glEnd();
+
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(menuX, menuY - 50);
+    glVertex2f(menuX + 400, menuY - 50);
+    glVertex2f(menuX + 400, menuY - 100);
+    glVertex2f(menuX, menuY - 100);
+    glEnd();
+   
+    glColor3f(1.0, 1.0, 1.0); // Set text color to white
+
+    // Draw menu options
+    float optionX = menuX + 20;
+    float optionY = menuY + 85;
+    drawText(optionX - 120, optionY -160, "Option 1");
+    drawText(optionX+90, optionY -160, "BACK TO MENU");
+
+    optionY -= 100;
+    drawText(optionX - 120, optionY -140, "Option 2");
+    drawText(optionX +150, optionY -140, "EXIT");
+   }
+
+    glutSwapBuffers();
+}
+
 // CALL BACK FUNCTION FOR ARROW 
 void arrow_display()
 {
@@ -408,11 +526,6 @@ void display(){
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor3f(0, 0, 1);
-    glPointSize(10);
-    glBegin(GL_POINTS);
-    glVertex2f(menuX, menuY);
-    glEnd();
 
     // Check the current screen and display accordingly
 
@@ -425,7 +538,7 @@ void display(){
         drawMenu();
         break;
     case 2: // Display option 2 screen
-        // Code to display option 2 screen
+        draw_about_page();
         break;
     case 3: // Display option 3 screen
         arrow_display();
