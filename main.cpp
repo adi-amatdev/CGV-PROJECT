@@ -3,6 +3,12 @@
 #include "myHeader.h"
 #include<iostream>
 using namespace std;
+#include <GL/glut.h>
+#include <stdlib.h>
+#include <cmath>
+#include <stdio.h>
+#include <fstream>
+#include <string>
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 // Global variable pool... must be accessible to all functions
@@ -31,7 +37,7 @@ float menuY = (height - 200) / 2.0;
 
 //flag section , contains flags for respective deciding of callbacks
 //integer flags 
-int DISPLAY_CALL_BACK_FLAG =2;
+int DISPLAY_CALL_BACK_FLAG =0;
 
 //bool flags
 bool isHoveringOption1 = false;
@@ -113,6 +119,35 @@ void decreaseSpeed()
 
 // call back functions
 //this is for intro_page mouse function:
+
+void mousefunc(int button, int state, int x, int y){
+    if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+        switch (DISPLAY_CALL_BACK_FLAG){
+            case 0:
+            if (x >= 300 && x <= 700 && y >= 225 && y <= 275)
+            {
+            DISPLAY_CALL_BACK_FLAG = 1;
+            glutPostRedisplay();
+            }
+
+            if (x >= menuX && x <= (menuX + 400) && y >= menuY && y <= menuY + 50)
+            {
+                exit(0);
+            }
+
+            if (x >= menuX && x <= menuX + 400 && y >= menuY - 100 && y <= menuY - 50)
+            {
+                DISPLAY_CALL_BACK_FLAG = 2;
+                glutPostRedisplay();
+            }
+            break;
+            case 2:
+
+            break;
+        }
+    }
+}
+
 void onMouseMove(int x, int y)
 {
     // Update hover status based on mouse position
@@ -568,6 +603,7 @@ int main(int argc , char *argv[]){
     glutReshapeFunc(reshape);
     glutTimerFunc(0, timer, 0);
     glutKeyboardFunc(keyboard); // Register keyboard callback function
+    glutMouseFunc(mousefunc);
     glutPassiveMotionFunc(onMouseMove);
 
     glutMainLoop();
