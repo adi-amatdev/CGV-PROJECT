@@ -474,17 +474,17 @@ void specialKeyboard(int key, int x, int y)
 // Function to display the scene
 void subwindowDisplay()
 {
-    
-       drawText(300,700, "use mouse to aim cannon by dragging");
-       drawText(300, 650, "up and down arrow to increase power of projectile and vice versa");
-       drawText(300, 600, "press space bar to launch");
-       drawText(300,550, "use mouse to aim cannon by dragging");
-       drawText(300, 500, "press 'p' to pause, 'p' to continue again");
-       drawText(300, 450, "press 'm' to return to main menu");
-       drawText(300, 400, "press 'e' to exit");
+        glColor3f(0,1,0);
+       drawText(200,700, "use mouse to aim cannon by dragging");
+       drawText(200, 650, "up and down arrow to increase power of projectile and vice versa");
+       drawText(200, 600, "press space bar to launch");
+       drawText(200,550, "use mouse to aim cannon by dragging");
+       drawText(200, 500, "press 'p' to pause, 'p' to continue again");
+       drawText(200, 450, "press 'm' to return to main menu");
+       drawText(200, 400, "press 'e' to exit");
        glColor3f(1,0,0);
-       drawText(300, 350, "press 's' key to start simulation now");
-           glutSwapBuffers();
+       drawText(200, 350, "press 's' key to start simulation");
+      glutSwapBuffers();
 }
 
 void simulation_display()
