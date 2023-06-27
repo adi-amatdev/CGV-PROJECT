@@ -229,7 +229,7 @@ void updateProjectile()
 //this is for intro_page mouse function:
 
 void mousefunc(int button, int state, int x, int y){
-    if(DISPLAY_CALL_BACK_FLAG == 3){
+    if(DISPLAY_CALL_BACK_FLAG == 6){
             if (button == GLUT_LEFT_BUTTON)
             {
                 if (state == GLUT_DOWN)
@@ -353,6 +353,7 @@ void onMouseMove(int x, int y)
 }
 void motion(int x, int y)
 {
+    cout<<"AIMING ....."<<endl;
     if (isLeftMouseButtonPressed)
     {
         int deltaX = x - previousMouseX;
