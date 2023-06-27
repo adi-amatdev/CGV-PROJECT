@@ -475,7 +475,6 @@ void specialKeyboard(int key, int x, int y)
 void subwindowDisplay()
 {
         glColor3f(0,1,0);
-       drawText(200,700, "use mouse to aim cannon by dragging");
        drawText(200, 650, "up and down arrow to increase power of projectile and vice versa");
        drawText(200, 600, "press space bar to launch");
        drawText(200,550, "use mouse to aim cannon by dragging");
