@@ -1,7 +1,6 @@
 #define GL_SILENCE_DEPRECATION
 
 #include<iostream>
-using namespace std;
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,8 +11,7 @@ using namespace std;
 #include <GL/freeglut.h>
 #include <cmath>
 #include <vector>
-#include <iostream>
-#include <GL/freeglut.h>
+using namespace std;
 
 //-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -200,7 +198,6 @@ void updateProjectile()
         {
             isProjectileLaunched = false;
             trailPoints.clear();
-            std::cout<<"PROJECTILE LAUNCHED:"<<std::endl<<std::endl;
             // Calculate and print the projectile information
             float angleOfProjection = cannonAngle;
             float horizontalDistance = projectileX - cannonX;
@@ -208,11 +205,12 @@ void updateProjectile()
             timeOfFlight = (2.0f * projectileVy) / GRAVITY;
             velocity = sqrt(pow(projectileVx, 2) + pow(projectileVy, 2));
 
-            std::cout << "Angle of Projection: " << angleOfProjection << " degrees" << std::endl;
-            std::cout << "Horizontal Distance Traveled: " << horizontalDistance << " units" << std::endl;
-            std::cout << "Maximum Height Reached: " << -maxHeight << " units" << std::endl;
-            std::cout << "Time of Flight: " << -timeOfFlight << " seconds" << std::endl;
-            std::cout << "Velocity: " << velocity << " units/s" << std::endl;
+            std::cout <<endl<< "PROJECTILE TRAJECTORY COMPLETE" << std::endl;
+            std::cout << "1. Angle of Projection: " << angleOfProjection << " degrees" << std::endl;
+            std::cout << "2. Horizontal Distance Traveled: " << horizontalDistance << " units" << std::endl;
+            std::cout << "3. Maximum Height Reached: " << -maxHeight << " units" << std::endl;
+            std::cout << "4. Time of Flight: " << -timeOfFlight << " seconds" << std::endl;
+            std::cout << "5. Velocity: " << velocity << " units/s" << std::endl<<std::endl;
 
             isTrajectoryComplete = true;
         }
@@ -415,6 +413,7 @@ void keyboard(unsigned char key, int x, int y)
 {
     if (key == ' ')
     {
+        cout<<"PROJECTILE LAUNCHED"<<endl;
         if (!isProjectileLaunched && isTrajectoryComplete)
         {
             float angleRad = cannonAngle * M_PI / 180.0f;
@@ -446,18 +445,29 @@ void keyboard(unsigned char key, int x, int y)
 }
 void specialKeyboard(int key, int x, int y)
 {
+    static int powerval = 5 ; //default
+
     if (!isProjectileLaunched)
     {
         switch (key)
         {
         case GLUT_KEY_UP: // Increase speed on Up arrow key
-            if (projectileSpeed < 14.0f)
+            if (projectileSpeed < 14.0f){
                 projectileSpeed += 1.0f;
+                ++powerval;
+                std::cout << "INCREASING POWER: " << powerval << std::endl;
+            }else {cout<<"MAX POWER"<<endl;}
             break;
         case GLUT_KEY_DOWN: // Decrease speed on Down arrow key
+
             if (projectileSpeed > 0.0f)
             {
                 projectileSpeed -= 1.0f;
+                --powerval;
+                std::cout << "DECREASING POWER: " << powerval << std::endl;
+            }else
+            {
+                cout << " CANT BE LESS THAN 0" << endl;
             }
             break;
         default:
